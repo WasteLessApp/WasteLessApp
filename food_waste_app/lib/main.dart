@@ -10,6 +10,9 @@ Future<void> main() async {
 
   runApp(MyApp());
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+  // subscribe to topic on each app start-up
+  await FirebaseMessaging.instance.subscribeToTopic('weather');
+  await FirebaseMessaging.instance.unsubscribeFromTopic('weather');
   messaging.getToken().then((token) {
     print(token);
   });
