@@ -25,6 +25,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAc4JYEoZnaTa04phh1vOyt50Yt8ID5uEc" />
+        <uses-permission
+            android:name="android.permission.ACCESS_FINE_LOCATION" />
+        <uses-permission
+            android.name="android.permission.INTERNET" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

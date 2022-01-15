@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:food_waste_app/map.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -8,7 +9,7 @@ Future<void> main() async {
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: Home(),
   ));
 
@@ -64,14 +65,12 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Food Waste App'),
+        title: const Text('Food Waste App'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Text('This is the setup Screen'),
-      ),
+      body: const MapAppView(),
       floatingActionButton: FloatingActionButton(
-        child: Text('click'),
+        child: const Text('click'),
         onPressed: () => print('it has been pressed'),
       ),
     );
