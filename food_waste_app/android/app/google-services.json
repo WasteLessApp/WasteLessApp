@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "578749921356",
+    "project_id": "food-waste-app-2022",
+    "storage_bucket": "food-waste-app-2022.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578749921356:android:17e7245129167766e11ce9",
+        "android_client_info": {
+          "package_name": "com.foodwasteapp.food_waste_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "578749921356-2rc47p44769279dfkbsdog4odbbbklvj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwjZbsAXDmKdyvpJd4Wn6pQzvYYn5oU_g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "578749921356-2rc47p44769279dfkbsdog4odbbbklvj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "578749921356-kcmmuroj0opd11rniaapi4kmbj6126og.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.foodwasteapp.Food-Waste-App"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
