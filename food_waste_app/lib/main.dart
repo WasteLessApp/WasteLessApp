@@ -1,15 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp();
   runApp(MyApp());
+  print(1);
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  messaging.getToken().then((token) {
+    print(token);
+  });
+  print(2);
+
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+  print(3);
+
+  String? token = await messaging.getToken(
+    vapidKey:
+        "BObmnLn-ezfeYeUYAVvzxGrk4bqOAL-v2sww_ulMO_iSvNUr6TDwkFlJw0Vc-kCDx-IhJnYTuJhcZlCyW5ucDIc",
+  );
+  print(4);
+
+  print(Firebase.apps);
+  print(5);
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
+
+    if (message.notification != null) {
+      print('Message also contained a notification: ${message.notification}');
+    }
+  });
+  print(6);
 }
 
 class MyApp extends StatelessWidget {
-  final Future<FirebaseApp> _fbApp = Firebase.initializeApp();
-  // const MyApp({Key? key}) : super(key: key);
+  MyApp({Key? key}) : super(key: key);
+  /* final Future<FirebaseApp> _fbApp = Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); */
 
   // This widget is the root of your application.
   @override
@@ -27,20 +67,20 @@ class MyApp extends StatelessWidget {
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
           primarySwatch: Colors.blue,
-        ),
-        home: FutureBuilder(
+        ) /* , */
+        /* home: FutureBuilder(
           future: _fbApp,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               print('You have an error! ${snapshot.error.toString()}');
-              return Text('Something went wrong!');
+              return const Text('Something went wrong!');
             } else if (snapshot.hasData) {
-              return MyHomePage(title: 'My Home Page');
+              return const MyHomePage(title: 'My Home Page');
             } else {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
           },
-        )
+        ) */
         // const MyHomePage(title: 'Flutter Demo Home Page'),
         );
   }
