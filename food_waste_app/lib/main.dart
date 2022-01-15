@@ -6,13 +6,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(MyApp());
-  print(1);
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   messaging.getToken().then((token) {
     print(token);
   });
-  print(2);
 
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
@@ -23,16 +23,13 @@ Future<void> main() async {
     provisional: false,
     sound: true,
   );
-  print(3);
 
   String? token = await messaging.getToken(
     vapidKey:
         "BObmnLn-ezfeYeUYAVvzxGrk4bqOAL-v2sww_ulMO_iSvNUr6TDwkFlJw0Vc-kCDx-IhJnYTuJhcZlCyW5ucDIc",
   );
-  print(4);
 
   print(Firebase.apps);
-  print(5);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print('Got a message whilst in the foreground!');
@@ -40,9 +37,18 @@ Future<void> main() async {
 
     if (message.notification != null) {
       print('Message also contained a notification: ${message.notification}');
+      print(message.notification?.title);
+      print(message.notification?.body);
     }
   });
-  print(6);
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  print("Handling a background message: ${message.messageId}");
+  print(message.notification?.title);
+  print(message.notification?.body);
 }
 
 class MyApp extends StatelessWidget {
