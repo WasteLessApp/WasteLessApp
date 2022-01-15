@@ -28,37 +28,12 @@ class MapSample extends StatefulWidget {
 }
 
 class MapSampleState extends State<MapSample> {
-  final Completer<GoogleMapController> _controller = Completer();
-  LocationData currentLocation;
+  late GoogleMapController _controller;
+  late LocationData currentLocation;
+  late Marker currentLocationMarker;
+  Location location = Location();
 
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
-
-  /* static const CameraPosition _kLake = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(37.43296265331129, -122.08832357078792),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414); */
-
-  /* @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: const Text('To the lake!'),
-        icon: const Icon(Icons.directions_boat),
-      ),
-    );
-  } */
+  LatLng initialPosition = const LatLng(36.977260, -122.050850);
 
   @override
   Widget build(BuildContext context) {
@@ -67,30 +42,73 @@ class MapSampleState extends State<MapSample> {
       body: GoogleMap(
         markers: Set.from(markers),
         mapType: MapType.normal,
-        initialCameraPosition: _kGooglePlex,
+        initialCameraPosition:
+            CameraPosition(target: initialPosition, zoom: 15),
         onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
+          _controller = controller;
+          location.onLocationChanged.listen((l) {
+            _controller.animateCamera(
+              CameraUpdate.newCameraPosition(CameraPosition(
+                  target: LatLng(l.latitude!, l.longitude!), zoom: 15)),
+            );
+          });
         },
       ),
     );
   }
 
-  /* Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
-  } */
+  @override
+  void initState() {
+    super.initState();
+    getLoc();
+    getData();
+  }
 
   Iterable markers = [];
+
+  getLoc() async {
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted == PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    currentLocation = await location.getLocation();
+    initialPosition =
+        LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    location.onLocationChanged.listen((LocationData _currentLocation) {
+      setState(() {
+        currentLocation = _currentLocation;
+        initialPosition =
+            LatLng(currentLocation.latitude!, currentLocation.longitude!);
+        markers = [Marker(markerId: MarkerId('1'), position: initialPosition)];
+      });
+    });
+  }
 
   getData() async {
     try {
       final response = await http.get(Uri.parse(
-          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500&type=restaurant&key=API_KEY'));
+          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${currentLocation.latitude},${currentLocation.longitude}&radius=1500&type=restaurant&key=API_KEY'));
 
       final int statusCode = response.statusCode;
 
       if (statusCode == 201 || statusCode == 200) {
         Map responseBody = json.decode(response.body);
+        print(responseBody);
         List results = responseBody["results"];
 
         Iterable _markers = Iterable.generate(min(10, results.length), (index) {
