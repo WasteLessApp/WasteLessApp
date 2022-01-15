@@ -53,6 +53,8 @@ class MapSampleState extends State<MapSample> {
             );
           });
         },
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
       ),
     );
   }
@@ -94,13 +96,14 @@ class MapSampleState extends State<MapSample> {
         currentLocation = _currentLocation;
         initialPosition =
             LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        markers = [Marker(markerId: MarkerId('1'), position: initialPosition)];
+        // markers = [Marker(markerId: MarkerId('1'), position: initialPosition)];
       });
     });
   }
 
   getData() async {
     try {
+      print('test');
       final response = await http.get(Uri.parse(
           'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${currentLocation.latitude},${currentLocation.longitude}&radius=1500&type=restaurant&key=API_KEY'));
 
@@ -109,6 +112,7 @@ class MapSampleState extends State<MapSample> {
       if (statusCode == 201 || statusCode == 200) {
         Map responseBody = json.decode(response.body);
         print(responseBody);
+        print('test');
         List results = responseBody["results"];
 
         Iterable _markers = Iterable.generate(min(10, results.length), (index) {
