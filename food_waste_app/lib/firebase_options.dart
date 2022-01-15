@@ -57,11 +57,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBUjZBA3QkB7vG7JhvhOrkbqQUh23I2vBo',
-    appId: '1:578749921356:ios:d80672a4869d67c0e11ce9',
+    appId: '1:578749921356:ios:6803543d15bc2198e11ce9',
     messagingSenderId: '578749921356',
     projectId: 'food-waste-app-2022',
     storageBucket: 'food-waste-app-2022.appspot.com',
-    iosClientId: '578749921356-7jkdv4mdlccmoa4gig3sb61rnbl4fe2b.apps.googleusercontent.com',
-    iosBundleId: 'com.foodwasteapp.FoodWasteApp',
+    iosClientId: '578749921356-a19kt24t38ll7g9h601o911mrqt2qenh.apps.googleusercontent.com',
+    iosBundleId: 'com.foodwasteapp.FoodWasteAppSigned',
   );
 }
