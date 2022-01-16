@@ -61,7 +61,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '578749921356',
     projectId: 'food-waste-app-2022',
     storageBucket: 'food-waste-app-2022.appspot.com',
-    iosClientId: '578749921356-a19kt24t38ll7g9h601o911mrqt2qenh.apps.googleusercontent.com',
+    iosClientId:
+        '578749921356-a19kt24t38ll7g9h601o911mrqt2qenh.apps.googleusercontent.com',
     iosBundleId: 'com.foodwasteapp.FoodWasteAppSigned',
   );
 }
