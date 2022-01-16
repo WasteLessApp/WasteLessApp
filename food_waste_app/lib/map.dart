@@ -7,8 +7,6 @@ import 'package:location/location.dart';
 import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 
-// void main() => runApp(const MapAppView());
-
 class MapAppView extends StatelessWidget {
   const MapAppView({Key? key, required this.buildContext}) : super(key: key);
 
@@ -36,6 +34,8 @@ class MapAppWidget extends StatefulWidget {
 
 class MapAppWidgetState extends State<MapAppWidget> {
   MapAppWidgetState(this.buildContext);
+  String _displayText = 'default';
+  final _database = FirebaseDatabase.instance.ref();
 
   final BuildContext buildContext;
 
@@ -46,7 +46,7 @@ class MapAppWidgetState extends State<MapAppWidget> {
   static const String googleCloudAPIKey =
       "AIzaSyA2x4NdZcuV-e99Kru3V1l_Uskq3pqq2wc";
   static int numOfPoints = 10;
-  static int radius = 2000;
+  static double radius = 0.05;
 
   Location location = Location();
   LatLng initialPosition = const LatLng(36.977260, -122.050850);
@@ -62,12 +62,6 @@ class MapAppWidgetState extends State<MapAppWidget> {
             CameraPosition(target: initialPosition, zoom: 15),
         onMapCreated: (GoogleMapController controller) {
           _controller = controller;
-          /* location.onLocationChanged.listen((l) {
-			_controller.animateCamera(
-			  CameraUpdate.newCameraPosition(CameraPosition(
-				  target: LatLng(l.latitude!, l.longitude!), zoom: 15)),
-			);
-		  }); */
         },
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
@@ -79,8 +73,53 @@ class MapAppWidgetState extends State<MapAppWidget> {
   void initState() {
     super.initState();
     getLoc();
-    // getData();
   }
+
+  void _activateListeners() async {
+    Stream<DatabaseEvent> stream = _database.child("publishers").onValue;
+    stream.listen((DatabaseEvent event) {
+      var data = json.decode(json.encode(event.snapshot.value));
+      List<Marker> markerList = [];
+      for (String key in data.keys) {
+        double lat = data[key]["lat"];
+        double lon = data[key]["long"];
+
+        if (getDistance(lat, lon, currentLocation.latitude!,
+                currentLocation.longitude!) <
+            radius) {
+          String name = data[key]["restaurant_name"];
+          String description = data[key]["description"];
+          int time = data[key]["time"];
+          LatLng latLngMarker = LatLng(lat, lon);
+          markerList.add(Marker(
+              markerId: MarkerId("marker_$key"),
+              position: latLngMarker,
+              onTap: () => Navigator.pushNamed(
+                  buildContext, LocationInfo.routeName,
+                  arguments: LocationArguments(
+                      name, description, latLngMarker, time))));
+        }
+      }
+
+      for (double i = 0; i < 12; i++) {
+        markerList.add(Marker(
+            markerId: MarkerId("$i"),
+            position: LatLng(
+                currentLocation.latitude! + radius * cos(i * 30 * pi / 180),
+                currentLocation.longitude! + radius * sin(i * 30 * pi / 180))));
+      }
+
+      setState(() {
+        markers = Iterable.castFrom(markerList);
+      });
+    });
+  }
+
+  double getDistance(double lat1, double lon1, double lat2, double lon2) {
+    return sqrt(pow(lat1 - lat2, 2) + pow(lon1 - lon2, 2));
+  }
+
+  //TODO: take data (as dictionary), get distance from current location to each publisher, and add to markers if less than radius
 
   Iterable markers = [];
 
@@ -121,7 +160,9 @@ class MapAppWidgetState extends State<MapAppWidget> {
       });
     });
 
-    try {
+    _activateListeners();
+
+    /* try {
       final response = await http.get(Uri.parse(
           'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${initialPosition.latitude},${initialPosition.longitude}&radius=${radius}&type=restaurant&key=${googleCloudAPIKey}'));
 
@@ -133,7 +174,6 @@ class MapAppWidgetState extends State<MapAppWidget> {
 
         Iterable _markers = Iterable.generate(min(10, results.length), (index) {
           Map result = results[index];
-          print(result);
           Map location = result["geometry"]["location"];
           LatLng latLngMarker = LatLng(location["lat"], location["lng"]);
 
@@ -154,17 +194,17 @@ class MapAppWidgetState extends State<MapAppWidget> {
       }
     } catch (e) {
       print(e.toString());
-    }
+    } */
   }
 }
 
 class LocationArguments {
   final String dhName;
   final String description;
-  final double lat;
-  final double lon;
+  final LatLng latlong;
+  final int time;
 
-  LocationArguments(this.dhName, this.description, this.lat, this.lon);
+  LocationArguments(this.dhName, this.description, this.latlong, this.time);
 }
 
 class LocationInfo extends StatelessWidget {

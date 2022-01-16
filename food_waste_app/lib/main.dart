@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:food_waste_app/map.dart';
-import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'firebase_options.dart';
 
 import 'login.dart';
 import 'dining_hall.dart';
 import 'dining_hall_post.dart';
+import 'create_post.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +21,7 @@ Future<void> main() async {
       '/': (context) => const Home(),
       "/dininghallpost": (context) => DiningHallPost(),
       "/loginpage": (context) => LoginScreen(),
+      "/createpost": (context) => CreatePost(),
       LocationInfo.routeName: (context) => const LocationInfo(),
     },
     // home: Home(),
