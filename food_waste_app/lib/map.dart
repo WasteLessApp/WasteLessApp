@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 import 'dart:convert';
 
-void main() => runApp(const MapAppView());
+// void main() => runApp(const MapAppView());
 
 class MapAppView extends StatelessWidget {
   const MapAppView({Key? key}) : super(key: key);
@@ -15,24 +15,29 @@ class MapAppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Flutter Google Maps Demo',
-      home: MapSample(),
+      home: MapAppWidget(),
     );
   }
 }
 
-class MapSample extends StatefulWidget {
-  const MapSample({Key? key}) : super(key: key);
+class MapAppWidget extends StatefulWidget {
+  const MapAppWidget({Key? key}) : super(key: key);
 
   @override
-  State<MapSample> createState() => MapSampleState();
+  State<MapAppWidget> createState() => MapAppWidgetState();
 }
 
-class MapSampleState extends State<MapSample> {
+class MapAppWidgetState extends State<MapAppWidget> {
   late GoogleMapController _controller;
   late LocationData currentLocation;
   late Marker currentLocationMarker;
-  Location location = Location();
 
+  static const String googleCloudAPIKey =
+      "AIzaSyA2x4NdZcuV-e99Kru3V1l_Uskq3pqq2wc";
+  static int numOfPoints = 10;
+  static int radius = 2000;
+
+  Location location = Location();
   LatLng initialPosition = const LatLng(36.977260, -122.050850);
 
   @override
@@ -46,12 +51,12 @@ class MapSampleState extends State<MapSample> {
             CameraPosition(target: initialPosition, zoom: 15),
         onMapCreated: (GoogleMapController controller) {
           _controller = controller;
-          location.onLocationChanged.listen((l) {
-            _controller.animateCamera(
-              CameraUpdate.newCameraPosition(CameraPosition(
-                  target: LatLng(l.latitude!, l.longitude!), zoom: 15)),
-            );
-          });
+          /* location.onLocationChanged.listen((l) {
+			_controller.animateCamera(
+			  CameraUpdate.newCameraPosition(CameraPosition(
+				  target: LatLng(l.latitude!, l.longitude!), zoom: 15)),
+			);
+		  }); */
         },
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
@@ -63,7 +68,7 @@ class MapSampleState extends State<MapSample> {
   void initState() {
     super.initState();
     getLoc();
-    getData();
+    // getData();
   }
 
   Iterable markers = [];
@@ -91,6 +96,11 @@ class MapSampleState extends State<MapSample> {
     currentLocation = await location.getLocation();
     initialPosition =
         LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    _controller.animateCamera(
+      CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(initialPosition.latitude, initialPosition.longitude),
+          zoom: 15)),
+    );
     location.onLocationChanged.listen((LocationData _currentLocation) {
       setState(() {
         currentLocation = _currentLocation;
@@ -99,20 +109,15 @@ class MapSampleState extends State<MapSample> {
         // markers = [Marker(markerId: MarkerId('1'), position: initialPosition)];
       });
     });
-  }
 
-  getData() async {
     try {
-      print('test');
       final response = await http.get(Uri.parse(
-          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${currentLocation.latitude},${currentLocation.longitude}&radius=1500&type=restaurant&key=API_KEY'));
+          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${initialPosition.latitude},${initialPosition.longitude}&radius=${radius}&type=restaurant&key=${googleCloudAPIKey}'));
 
       final int statusCode = response.statusCode;
 
       if (statusCode == 201 || statusCode == 200) {
         Map responseBody = json.decode(response.body);
-        print(responseBody);
-        print('test');
         List results = responseBody["results"];
 
         Iterable _markers = Iterable.generate(min(10, results.length), (index) {
@@ -121,7 +126,11 @@ class MapSampleState extends State<MapSample> {
           LatLng latLngMarker = LatLng(location["lat"], location["lng"]);
 
           return Marker(
-              markerId: MarkerId("marker$index"), position: latLngMarker);
+              markerId: MarkerId("marker$index"),
+              position: latLngMarker,
+              onTap: () => Navigator.pushNamed(context, LocationInfo.routeName,
+                  arguments:
+                      LocationArguments('testname', 'description', 0, 0)));
         });
 
         setState(() {
@@ -133,5 +142,33 @@ class MapSampleState extends State<MapSample> {
     } catch (e) {
       print(e.toString());
     }
+  }
+}
+
+class LocationArguments {
+  final String dhName;
+  final String description;
+  final double lat;
+  final double lon;
+
+  LocationArguments(this.dhName, this.description, this.lat, this.lon);
+}
+
+class LocationInfo extends StatelessWidget {
+  const LocationInfo({Key? key}) : super(key: key);
+
+  static const routeName = '/locationInfo';
+
+  @override
+  Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as LocationArguments;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(args.dhName),
+      ),
+      body: Center(child: Text(args.description)),
+    );
   }
 }
