@@ -1,10 +1,12 @@
 // login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
-import 'dining_hall.dart';
 import 'dining_hall_post.dart';
 
 class LoginScreen extends StatelessWidget {
+  const LoginScreen({Key? key, required this.buildContext}) : super(key: key);
+  final BuildContext buildContext;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,6 +14,7 @@ class LoginScreen extends StatelessWidget {
         title: const Text('Login'),
         centerTitle: true,
       ),
+      extendBodyBehindAppBar: true,
       body: /* Container(
         height: MediaQuery.of(context).size.height,
         child: Align(
@@ -41,7 +44,7 @@ class LoginScreen extends StatelessWidget {
         onSubmitAnimationCompleted: () {
           //Navigator.pushNamed(context, '/dininghallpost');
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => DiningHallPost(),
+            builder: (context) => DiningHallPost(buildContext: buildContext),
           ));
         },
         onRecoverPassword: (_) => null,

@@ -6,9 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 
 import 'login.dart';
-import 'dining_hall.dart';
 import 'dining_hall_post.dart';
-import 'create_post.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,10 +17,13 @@ Future<void> main() async {
     initialRoute: '/',
     routes: {
       '/': (context) => const Home(),
-      "/dininghallpost": (context) => DiningHallPost(),
-      "/loginpage": (context) => LoginScreen(),
-      "/createpost": (context) => CreatePost(),
-      LocationInfo.routeName: (context) => const LocationInfo(),
+      "/dininghallpost": (context) => DiningHallPost(
+            buildContext: context,
+          ),
+      "/loginpage": (context) => LoginScreen(
+            buildContext: context,
+          ),
+      LocationInfo.routeName: (context) => LocationInfo(),
     },
     // home: Home(),
   ));
@@ -78,6 +79,7 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: Main._scaffoldKey,
       appBar: AppBar(
         title: const Text('Food Waste App'),
         centerTitle: true,
@@ -106,4 +108,10 @@ class Home extends StatelessWidget {
         break;
     }
   }
+}
+
+class Main {
+  static final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>();
+  static GlobalKey<ScaffoldState> get scaffoldKey => _scaffoldKey;
 }

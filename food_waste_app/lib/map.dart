@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:food_waste_app/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
+import 'visibility.dart';
+import 'main.dart';
 
 class MapAppWidget extends StatefulWidget {
   const MapAppWidget({Key? key, required this.buildContext}) : super(key: key);
@@ -49,6 +52,7 @@ class MapAppWidgetState extends State<MapAppWidget> {
         },
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
+        zoomControlsEnabled: true,
       ),
     );
   }
@@ -79,9 +83,14 @@ class MapAppWidgetState extends State<MapAppWidget> {
               markerId: MarkerId("marker_$key"),
               position: latLngMarker,
               onTap: () => Navigator.pushNamed(
-                  buildContext, LocationInfo.routeName,
+                  Main.scaffoldKey.currentContext!, LocationInfo.routeName,
                   arguments: LocationArguments(
-                      name, description, latLngMarker, time))));
+                      data[key]["id"],
+                      name,
+                      description,
+                      latLngMarker,
+                      time,
+                      VisibilityFlag.invisible))));
         }
       }
 
@@ -144,21 +153,26 @@ class MapAppWidgetState extends State<MapAppWidget> {
 
   static double getLon() {
     // ignore: unnecessary_null_comparison
-    return currentLocation == null ? 0 : currentLocation.latitude!;
+    return currentLocation == null ? 0 : currentLocation.longitude!;
   }
 }
 
 class LocationArguments {
+  final String id;
   final String dhName;
   final String description;
   final LatLng latlong;
   final int time;
+  final VisibilityFlag deleteButtonVisible;
+  List datapoints = [];
 
-  LocationArguments(this.dhName, this.description, this.latlong, this.time);
+  LocationArguments(this.id, this.dhName, this.description, this.latlong,
+      this.time, this.deleteButtonVisible,
+      {this.datapoints = const []});
 }
 
 class LocationInfo extends StatelessWidget {
-  const LocationInfo({Key? key}) : super(key: key);
+  LocationInfo({Key? key}) : super(key: key);
 
   static const routeName = '/locationInfo';
 
@@ -195,13 +209,32 @@ class LocationInfo extends StatelessWidget {
                         markerId: MarkerId("marker_${args.dhName}"),
                         position: args.latlong)
                   },
-                ))
+                )),
+            VisibilityWidget(
+              child: TextButton(
+                child: Text("Delete"),
+                onPressed: () {
+                  final database = FirebaseDatabase.instance.ref();
+                  final publisherRef = database.child('publishers/');
+
+                  publisherRef.child(args.id).remove();
+
+                  for (int i = 0; i < args.datapoints.length; i++) {
+                    if (args.datapoints[i]["id"] == args.id) {
+                      args.datapoints.removeAt(i);
+                    }
+                  }
+                  Navigator.pop(context);
+                },
+              ),
+              visibility: args.deleteButtonVisible,
+            )
           ],
         )));
     // Center(child: Text(args.description)),
   }
 
-  String formatTime(int time) {
+  static String formatTime(int time) {
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
     int hour = dateTime.hour;
     int minute = dateTime.minute;
