@@ -16,8 +16,10 @@ For the majority of us, this was our first hackathon, so challenges were bound t
 It was also our first time ever working with Firebase and Flutter, giving way to a steep learning curve. Especially since Flutter utilizes Dart, a language brand new to us, it took some time to adjust and understand its functionality. Besides Flutter, we had some trouble understanding how Firebase Cloud Messaging worked, so we spent a lot of time understanding the API's features. Along with learning new platforms and skills, we had trouble linking Google Cloud with our application to allow the client and server communicate with one another. While one way notificatiosn were a start, we later configured a database with Firebase Realtime Databse to permit a two-way communication stream. 
 
 ## Accomplishments that we're proud of
-We are proud of th
+We are proud of our map's viewability and interactivity with markers noting institutions with excess food along with location tracking to direct individuals to local areas. We also spent a great deal of time making sure that our application can be comfortably viewed on both Android and iOS devices. In addition, we are proud of our simple interface that allows users to post and search in our application based on their needs. 
 
 ## What we learned
+As mentioned earlier, we learned how to utilize Firebase's Realtime Database to store organization information, Flutter to develop the application, and navigation and routing. We enjoyed learning about and implementing Google Cloud's features into our project and hope to continue learning more in the future.
 
 ## What's next for WasteLess
+We 
