@@ -11,8 +11,12 @@ Instead of tossing leftover food that won't be served the next day, why not dona
 WasteLess was developed utilizing Google's open source framework Flutter along with HTML, Objective-C, Ruby, Swift, and Kotlin. After the user verifies their credentials in our login page, the home page provides information on how to post or locate an insitution with excess food. We used the Google Maps API to display pinpoints of restaurants, hotels, and schools nearby the user based on their location and a pinpoint based on their specified search. Within the business side, we utilized Google Cloud's Firebase Realtime Database to store each of the restaurants, hotels, and schools' informational posts.
 
 ## Challenges we ran into
+For the majority of us, this was our first hackathon, so challenges were bound to arise. 
+
+It was also our first time ever working with Firebase and Flutter, giving way to a steep learning curve. Especially since Flutter utilizes Dart, a language brand new to us, it took some time to adjust and understand its functionality. Besides Flutter, we had some trouble understanding how Firebase Cloud Messaging worked, so we spent a lot of time understanding the API's features. Along with learning new platforms and skills, we had trouble linking Google Cloud with our application to allow the client and server communicate with one another. While one way notificatiosn were a start, we later configured a database with Firebase Realtime Databse to permit a two-way communication stream. 
 
 ## Accomplishments that we're proud of
+We are proud of th
 
 ## What we learned
 
