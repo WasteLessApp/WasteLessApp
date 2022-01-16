@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dining_hall.dart';
 import 'login.dart';
 import 'create_post.dart';
+import 'dart:convert';
 
 class DiningHallPost extends StatefulWidget {
   const DiningHallPost({Key? key}) : super(key: key);
@@ -17,14 +18,44 @@ class DiningHallPost extends StatefulWidget {
 
 class _DiningHallPostState extends State<DiningHallPost> {
   final database = FirebaseDatabase.instance.ref();
-  final titles = ["Food companies/dining hall names go here"];
-  final subtitles = ["Each company description goes here"];
+  String _displayText = 'default';
+  // final _database = FirebaseDatabase.instance.ref();
+
+  @override
+  void initState() {
+    super.initState();
+    activateListeners();
+  }
+
+  activateListeners() async {
+    Stream<DatabaseEvent> stream = database.child("publishers").onValue;
+    stream.listen((DatabaseEvent event) {
+      var data = json.decode(json.encode(event.snapshot.value));
+      // print(data);
+    });
+  }
+
+  String name = "";
+  String description = "";
+  List<String> restaurantID = [];
+  List<String> restaurantDescriptions = [];
+  List<String> dataMaker() {
+    List<String> restaurantDescriptions = [];
+    DatabaseReference ref = FirebaseDatabase.instance.ref("publishers/");
+    for (String i in restaurantID) {
+      restaurantDescriptions.add(ref.child(i).once());
+    }
+    print(restaurantDescriptions);
+    return restaurantDescriptions;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final database = FirebaseDatabase.instance.ref();
     final publisherRef = database.child('publishers/');
 
-    void post(String restaurant_name, int time, double lat, double long,
-        String description) async {
+    String post(String restaurant_name, int time, double lat, double long,
+        String description) {
       final newRestraunt = <String, dynamic>{
         'restaurant_name': restaurant_name,
         'time': time,
@@ -32,96 +63,66 @@ class _DiningHallPostState extends State<DiningHallPost> {
         'long': long,
         'description': description,
       };
-      return Future(
-          () => database.child('publishers/').push().set(newRestraunt));
+      return database.child('publishers/').push().set(newRestraunt).toString();
     }
 
     post("mcdonalds", DateTime.now().millisecondsSinceEpoch, 37.785834,
         -122.406417, "head to the back we got krabby patties");
 
-    return Scaffold(
-        appBar: AppBar(
-            title: const Text('Dining Halls Nearby'),
-            centerTitle: true,
-            actions: [
-              PopupMenuButton(
-                  icon: const Icon(Icons.menu),
-                  itemBuilder: (context) => [
-                        const PopupMenuItem<int>(
-                          value: 0,
-                          child: Text("Create a Post"),
-                        ),
-                      ],
-                  onSelected: (item) {
-                    Navigator.pushNamed(context, '/createpost');
-                  })
-            ]),
-        body: ListView(padding: const EdgeInsets.all(8),
-            //getting rid of const for children add back if error thrown
-            children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter a search term',
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Enter your Description',
-                  ),
-                ),
-              ),
-              ListView.builder(
-                  itemCount: titles.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                        child: ListTile(
-                      onTap: () {
-                        // Navigator.pushNamed(context, '/createpost');
-                      },
-                      title: Text(titles[index]),
-                      subtitle: Text(subtitles[index]),
-                    ));
-                  })
-            ]
-            /*
-            Card(
-                child: ListTile(
-                    title: Text("College 9/10"),
-                    subtitle: Text("leftover pizza, burgers, sandwiches"))),
-            TextButton(
-                style: ButtonStyle(
-                  foregroundColor:
-                      MaterialStateProperty.all<Color>(Colors.blue),
-                ),
-                child: Text('TextButton'),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/createpost');
-                }),
-            Card(
-                child: ListTile(
-              title: Text("Porter"),
-              subtitle: Text("leftover apples"),
-            )),
-            Card(
-                child: ListTile(
-              title: Text("Crown"),
-              subtitle: Text("leftover coffee"),
-            )),
-            Card(
-                child: ListTile(
-              title: Text("Stevenson"),
-              subtitle: Text("leftover cookies"),
-            ))
-            */
+    final myController = TextEditingController();
 
-            ));
+    final TextEditingController eCtrl1 = new TextEditingController();
+    final TextEditingController eCtrl2 = new TextEditingController();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Publish a Food Alert'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text('Publish a Food Alert'),
+            TextField(
+              controller: eCtrl1,
+              style: TextStyle(height: 10),
+              decoration: InputDecoration(
+                hintText: 'Enter Restaurant/Provider Name',
+              ),
+              onChanged: (text) {
+                name = text;
+              },
+            ),
+            TextField(
+              controller: eCtrl2,
+              style: TextStyle(height: 10),
+              decoration: InputDecoration(
+                hintText: 'Enter Description',
+              ),
+              onChanged: (text) {
+                description = text;
+              },
+            ),
+            TextButton(
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+              ),
+              onPressed: () {
+                restaurantID.add(post(
+                    name,
+                    DateTime.now().millisecondsSinceEpoch,
+                    MapAppWidgetState.getLat(),
+                    MapAppWidgetState.getLon(),
+                    description));
+                eCtrl1.clear();
+                eCtrl2.clear();
+              },
+              child: Text('Publish'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

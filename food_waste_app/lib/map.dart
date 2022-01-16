@@ -2,26 +2,9 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
-
-class MapAppView extends StatelessWidget {
-  const MapAppView({Key? key, required this.buildContext}) : super(key: key);
-
-  final BuildContext buildContext;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Google Maps Demo',
-      home: MapAppWidget(
-        buildContext: buildContext,
-      ),
-    );
-  }
-}
 
 class MapAppWidget extends StatefulWidget {
   const MapAppWidget({Key? key, required this.buildContext}) : super(key: key);
@@ -40,7 +23,7 @@ class MapAppWidgetState extends State<MapAppWidget> {
   final BuildContext buildContext;
 
   late GoogleMapController _controller;
-  late LocationData currentLocation;
+  static late LocationData currentLocation;
   late Marker currentLocationMarker;
 
   static const String googleCloudAPIKey =
@@ -50,6 +33,7 @@ class MapAppWidgetState extends State<MapAppWidget> {
 
   Location location = Location();
   LatLng initialPosition = const LatLng(36.977260, -122.050850);
+  Iterable markers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -72,10 +56,10 @@ class MapAppWidgetState extends State<MapAppWidget> {
   @override
   void initState() {
     super.initState();
-    getLoc();
+    runMethods();
   }
 
-  void _activateListeners() async {
+  activateListeners() async {
     Stream<DatabaseEvent> stream = _database.child("publishers").onValue;
     stream.listen((DatabaseEvent event) {
       var data = json.decode(json.encode(event.snapshot.value));
@@ -101,29 +85,13 @@ class MapAppWidgetState extends State<MapAppWidget> {
         }
       }
 
-      for (double i = 0; i < 12; i++) {
-        markerList.add(Marker(
-            markerId: MarkerId("$i"),
-            position: LatLng(
-                currentLocation.latitude! + radius * cos(i * 30 * pi / 180),
-                currentLocation.longitude! + radius * sin(i * 30 * pi / 180))));
-      }
-
       setState(() {
         markers = Iterable.castFrom(markerList);
       });
     });
   }
 
-  double getDistance(double lat1, double lon1, double lat2, double lon2) {
-    return sqrt(pow(lat1 - lat2, 2) + pow(lon1 - lon2, 2));
-  }
-
-  //TODO: take data (as dictionary), get distance from current location to each publisher, and add to markers if less than radius
-
-  Iterable markers = [];
-
-  getLoc() async {
+  getLocation() async {
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
@@ -156,45 +124,27 @@ class MapAppWidgetState extends State<MapAppWidget> {
         currentLocation = _currentLocation;
         initialPosition =
             LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        // markers = [Marker(markerId: MarkerId('1'), position: initialPosition)];
       });
     });
+  }
 
-    _activateListeners();
+  runMethods() async {
+    await getLocation();
+    await activateListeners();
+  }
 
-    /* try {
-      final response = await http.get(Uri.parse(
-          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${initialPosition.latitude},${initialPosition.longitude}&radius=${radius}&type=restaurant&key=${googleCloudAPIKey}'));
+  double getDistance(double lat1, double lon1, double lat2, double lon2) {
+    return sqrt(pow(lat1 - lat2, 2) + pow(lon1 - lon2, 2));
+  }
 
-      final int statusCode = response.statusCode;
+  static double getLat() {
+    // ignore: unnecessary_null_comparison
+    return currentLocation == null ? 0 : currentLocation.latitude!;
+  }
 
-      if (statusCode == 201 || statusCode == 200) {
-        Map responseBody = json.decode(response.body);
-        List results = responseBody["results"];
-
-        Iterable _markers = Iterable.generate(min(10, results.length), (index) {
-          Map result = results[index];
-          Map location = result["geometry"]["location"];
-          LatLng latLngMarker = LatLng(location["lat"], location["lng"]);
-
-          return Marker(
-              markerId: MarkerId("marker$index"),
-              position: latLngMarker,
-              onTap: () => Navigator.pushNamed(
-                  buildContext, LocationInfo.routeName,
-                  arguments: LocationArguments(result['name'],
-                      result['vicinity'], location['lat'], location['lng'])));
-        });
-
-        setState(() {
-          markers = _markers;
-        });
-      } else {
-        throw Exception('Error');
-      }
-    } catch (e) {
-      print(e.toString());
-    } */
+  static double getLon() {
+    // ignore: unnecessary_null_comparison
+    return currentLocation == null ? 0 : currentLocation.latitude!;
   }
 }
 
@@ -218,10 +168,48 @@ class LocationInfo extends StatelessWidget {
         ModalRoute.of(context)!.settings.arguments as LocationArguments;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(args.dhName),
-      ),
-      body: Center(child: Text(args.description)),
-    );
+        appBar: AppBar(
+          title: Text(args.dhName),
+        ),
+        body: SingleChildScrollView(
+            child: Column(
+          children: <Widget>[
+            Padding(
+                padding: const EdgeInsets.all(10),
+                child: Center(
+                    child: Text(
+                  "Description: \n${args.description}\n\nPosted at ${formatTime(args.time)}",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 20),
+                ))),
+            SizedBox(
+                height: 300,
+                width: MediaQuery.of(context).size.width,
+                child: GoogleMap(
+                  initialCameraPosition:
+                      CameraPosition(target: args.latlong, zoom: 19),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  markers: {
+                    Marker(
+                        markerId: MarkerId("marker_${args.dhName}"),
+                        position: args.latlong)
+                  },
+                ))
+          ],
+        )));
+    // Center(child: Text(args.description)),
+  }
+
+  String formatTime(int time) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
+    int hour = dateTime.hour;
+    int minute = dateTime.minute;
+    String amPm = "AM";
+    if (hour > 12) {
+      hour -= 12;
+      amPm = "PM";
+    }
+    return hour.toString() + ":" + minute.toString() + " " + amPm;
   }
 }

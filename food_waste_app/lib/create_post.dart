@@ -3,7 +3,14 @@ import 'login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CreatePost extends StatelessWidget {
+class CreatePost extends StatefulWidget {
+  const CreatePost({Key? key}) : super(key: key);
+
+  @override
+  _CreatePostState createState() => _CreatePostState();
+}
+
+class _CreatePostState extends State<CreatePost> {
   String company_name = '';
   String company_description = '';
   TextEditingController userInput = TextEditingController();
@@ -35,9 +42,10 @@ class CreatePost extends StatelessWidget {
           border: OutlineInputBorder(),
         ),
         onChanged: (value) {
-          /* setState(() {
+          setState(() {
             company_name = value;
-          }); */
+          });
         },
       );
+  // Widget buildCompanyDescription() => TextFormField(decoration: InputDec);
 }
