@@ -9,25 +9,35 @@ import 'dart:convert';
 // void main() => runApp(const MapAppView());
 
 class MapAppView extends StatelessWidget {
-  const MapAppView({Key? key}) : super(key: key);
+  const MapAppView({Key? key, required this.buildContext}) : super(key: key);
+
+  final BuildContext buildContext;
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Flutter Google Maps Demo',
-      home: MapAppWidget(),
+      home: MapAppWidget(
+        buildContext: buildContext,
+      ),
     );
   }
 }
 
 class MapAppWidget extends StatefulWidget {
-  const MapAppWidget({Key? key}) : super(key: key);
+  const MapAppWidget({Key? key, required this.buildContext}) : super(key: key);
+
+  final BuildContext buildContext;
 
   @override
-  State<MapAppWidget> createState() => MapAppWidgetState();
+  State<MapAppWidget> createState() => MapAppWidgetState(buildContext);
 }
 
 class MapAppWidgetState extends State<MapAppWidget> {
+  MapAppWidgetState(this.buildContext);
+
+  final BuildContext buildContext;
+
   late GoogleMapController _controller;
   late LocationData currentLocation;
   late Marker currentLocationMarker;
@@ -122,15 +132,17 @@ class MapAppWidgetState extends State<MapAppWidget> {
 
         Iterable _markers = Iterable.generate(min(10, results.length), (index) {
           Map result = results[index];
+          print(result);
           Map location = result["geometry"]["location"];
           LatLng latLngMarker = LatLng(location["lat"], location["lng"]);
 
           return Marker(
               markerId: MarkerId("marker$index"),
               position: latLngMarker,
-              onTap: () => Navigator.pushNamed(context, LocationInfo.routeName,
-                  arguments:
-                      LocationArguments('testname', 'description', 0, 0)));
+              onTap: () => Navigator.pushNamed(
+                  buildContext, LocationInfo.routeName,
+                  arguments: LocationArguments(result['name'],
+                      result['vicinity'], location['lat'], location['lng'])));
         });
 
         setState(() {

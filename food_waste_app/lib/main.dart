@@ -92,7 +92,7 @@ class Home extends StatelessWidget {
               })
         ],
       ),
-      body: const MapAppView(),
+      body: MapAppView(buildContext: context),
     );
   }
 
