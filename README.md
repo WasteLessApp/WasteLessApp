@@ -11,6 +11,7 @@ Reistributing excess food to individuals facing food insecurity one meal at a ti
 
 
 ## How we built it
+WasteLess was developed utilizing Google's open source framework Flutter along with HTML, Objective-C, Ruby, Swift, and Kotlin. After the user verifies their credentials in our login page, the home page provides information on how to post or locate an insitution with excess food. We used the Google Maps API to display pinpoints of restaurants nearby the user based on their location and a pinpoint based on their specified search. 
 
 ## Challenges we ran into
 
