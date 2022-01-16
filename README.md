@@ -22,4 +22,4 @@ Diving into the program development, we were all intimidated by the path ahead o
 As mentioned earlier, we learned how to utilize Firebase's Realtime Database to store organization information, Flutter to develop the application, and navigation and routing from Google Maps APIs. We enjoyed learning about and implementing Google Cloud's features into our project and hope to continue learning more in the future.
 
 ## What's next for WasteLess
-We hope to make a more accessible user interface with features based on each user's individual needs. We hope to bring our application to life by working with UCSC dining halls, local restaurants downtown, farmer's markets, and later expanding into Santa Cruz County.
+We hope to make a more accessible user interface with polished features based on each user's individual needs. We also plan on delving into background push notifications to help alert everyone of new food listings. We hope to bring our application to life by working with UCSC dining halls, local restaurants downtown, farmer's markets, and later expanding into Santa Cruz County.
